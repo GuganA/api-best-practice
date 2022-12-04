@@ -11,13 +11,13 @@ const router = express.Router();
 
 /**
  * @openapi
- * /api/v1/data
- *    get:
- *      tags:
- *        - data
- *      response:
- *        200:
- *          description: OK
+ * /api/v1/data:
+ *   get:
+ *     tags:
+ *       - data
+ *     responses:
+ *       200:
+ *         description: OK
  *         content:
  *           application/json:
  *             schema:
@@ -30,7 +30,7 @@ const router = express.Router();
  *                   type: array 
  *                   items: 
  *                     type: object
- *      
+ * 
  */
 router.get("/", getAlldatas);
 
