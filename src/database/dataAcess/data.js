@@ -4,11 +4,9 @@ const getAlldata = () => {
   return new Promise((resolve, reject) => {
     Data.find()
       .then((data) => {
-        console.log("access layer", data);
         resolve(data);
       })
       .catch((error) => {
-        console.erroror(error);
         reject(error);
       });
   });
@@ -18,10 +16,12 @@ const getData = async (dataId) => {
   return new Promise((resolve, reject) => {
     Data.findById(dataId)
       .then((data) => {
+        if (!data) {
+          resolve('No Data found');
+        }
         resolve(data);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -38,10 +38,12 @@ const createData = (newData) => {
         writer,
         name,
         description,
+        createdAt: new Date().toLocaleString("en-US", { timeZone: "UTC" }),
+        updatedAt: new Date().toLocaleString("en-US", { timeZone: "UTC" })
       });
 
       await createNewdata.save();
-      resolve("New Data Saved");
+      resolve(newData);
     } catch (error) {
       reject(error);
     }
@@ -51,12 +53,10 @@ const createData = (newData) => {
 const deleteData = (dataId) => {
   return new Promise(async (resolve, reject) => {
     Data.findByIdAndDelete(dataId)
-      .then((data) => {
-        console.log(data);
+      .then(() => {
         resolve("Data deleted");
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -64,15 +64,25 @@ const deleteData = (dataId) => {
 
 const updateData = (dataId, updateData) => {
   return new Promise(async (resolve, reject) => {
-    Data.findById(dataId)
-      .then((existingData) => {
-        existingData.description = updateData.description;
-        existingData.save();
-        resolve(existingData);
-      })
-      .catch((erroror) => {
-        console.erroror(erroror);
-        reject(erroror);
+    Data.findOneAndUpdate(
+      { _id: dataId },
+      {
+        $set: {
+          name: updateData.name,
+          description: updateData.description,
+          writer: updateData.writer,
+          // createdAt: ,
+          updatedAt: new Date().toLocaleString("en-US", { timeZone: "UTC" })
+        },
+      },
+      { new: true },
+      (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log(data);
+          resolve(data);
+        }
       });
   });
 };

@@ -8,28 +8,47 @@ import {
 
 const getAlldatas = (req, res) => {
   getAlldataService().then((allData) => {
-    res.send({ status: "OK", Data: allData });
+    return res.status(200).send({ status: "OK", Data: allData });
   });
 };
 
 const getOnedata = (req, res) => {
   getOnedataService(req.params.dataId).then((oneData) => {
-    res.send({ status: "OK", Data: oneData });
+    return res.send({ status: "OK", Data: oneData });
   }).catch((err) => {
-    res.send({ status: "Error", Error: err });
+    return res.send({ status: "Error", Error: err });
   })
 };
 
 const createNewdata = (req, res) => {
-  res.send("Create a new data");
+  if (!req?.body?.name || !req?.body?.description || !req?.body?.writer) {
+    res.status(400).send({ status: "Error", Error: 'Please enter the missing data' })
+  }
+  createNewdataService(req.body).then((data) => {
+    return res.send({ status: "OK", Data: data, message: "New data created" });
+  }).catch((err) => {
+    return res.send({ status: "Error", Error: err });
+  })
 };
 
 const updateOnedata = (req, res) => {
-  res.send("Update an existing data");
+  if (!req?.body?.name || !req?.body?.description || !req?.body?.writer) {
+    res.status(400).send({ status: "Error", Error: 'Please enter the missing data' })
+  }
+  updateOnedataService(req.params.dataId, req.body).then((data) => {
+    return res.send({ status: "OK", Data: data, message: "Data updated successfully" })
+  }).catch((err) => {
+    return res.send({ status: "Error", Error: err })
+  })
 };
 
 const deleteOnedata = (req, res) => {
-  res.send("Delete an existing data");
+  deleteOnedataService(req.params.dataId).then((data) => {
+    return res.status(400).send({ status: "OK", Data: data, message: "Delete an existing data" });
+
+  }).catch((err) => {
+    return res.send({ status: "Error", Error: err });
+  })
 };
 
 export { getAlldatas, getOnedata, createNewdata, updateOnedata, deleteOnedata };
