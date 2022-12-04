@@ -7,7 +7,7 @@ const getAlldata = () => {
         resolve(data);
       })
       .catch((error) => {
-        reject(error);
+        reject({ status: 400, error: error });
       });
   });
 };
@@ -17,12 +17,12 @@ const getData = async (dataId) => {
     Data.findById(dataId)
       .then((data) => {
         if (!data) {
-          resolve('No Data found');
+          reject({ status: 404, error: 'No Data found' });
         }
         resolve(data);
       })
       .catch((error) => {
-        reject(error);
+        reject({ status: 400, error: error });
       });
   });
 };
@@ -45,7 +45,7 @@ const createData = (newData) => {
       await createNewdata.save();
       resolve(newData);
     } catch (error) {
-      reject(error);
+      reject({ status: 400, error: error });
     }
   });
 };
@@ -57,7 +57,7 @@ const deleteData = (dataId) => {
         resolve("Data deleted");
       })
       .catch((error) => {
-        reject(error);
+        reject({ status: 400, error: error });
       });
   });
 };
@@ -71,14 +71,13 @@ const updateData = (dataId, updateData) => {
           name: updateData.name,
           description: updateData.description,
           writer: updateData.writer,
-          // createdAt: ,
           updatedAt: new Date().toLocaleString("en-US", { timeZone: "UTC" })
         },
       },
       { new: true },
-      (err, data) => {
-        if (err) {
-          reject(err);
+      (error, data) => {
+        if (error) {
+          reject({ status: 400, error: error });
         } else {
           console.log(data);
           resolve(data);
