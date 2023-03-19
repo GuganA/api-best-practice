@@ -5,12 +5,10 @@ const dataSchema = new Schema({
   name: { type: String, required: true },
   content: { type: String, required: true },
   isPublic: { type: Boolean, default: false, required: true },
-  createdAt: { type: String, required: true },
-  updatedAt: { type: String, required: true }
 }, {
   timestamps: true
 });
 
-const Data = model('Story', dataSchema);
+const dataModal = model('Story', dataSchema);
 
-export { Data };
+export { dataModal };

@@ -1,15 +1,15 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import {
   getAlldatas,
   getOnedata,
   createNewdata,
   updateOnedata,
   deleteOnedata,
-} from '../../controllers/dataControler.js';
+} from '../../controllers';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/healthCheck', (req, res) => { res.sendStatus(200) });
+router.get('/healthCheck', (req: Request, res: Response) => { res.sendStatus(200) });
 
 router.get('/', getAlldatas);
 

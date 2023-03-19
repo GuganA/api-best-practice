@@ -1,18 +1,17 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { router as routerV1 } from './v1/routes/dataRoutes.js';
-import { checkConnection } from './utils/connectionCheck.js';
+import { Data, User } from './v1/routes';
+import { checkConnection, logger, config, swaggerDocs } from './utils';
+import cookieParser from 'cookie-parser';
 import apicache from 'apicache';
-import swaggerDocs from './v1/swagger.js';
-import logger from './utils/logger.js';
-import { config } from './utils/config.js';
 
 const app = express();
 const port = config.port || 3000;
 const cache = apicache.middleware;
 
-app.use(bodyParser.json());
-app.use(cache(2))
+app.use(bodyParser.json()); // Parsing json Objects
+app.use(cookieParser()); // Parsing cookie
+app.use(cache(2)); // Server Cache
 
 checkConnection();
 
@@ -22,7 +21,8 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.use('/api/v1/data', routerV1);
+app.use('/api/v1/data', Data);
+app.use('/api/v1/users', User);
 
 app.listen(port, () => {
   swaggerDocs(app, port);
