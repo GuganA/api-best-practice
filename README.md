@@ -1,3 +1,1 @@
 # Api Best Practice
-
-#
