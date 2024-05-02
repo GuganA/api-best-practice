@@ -9,7 +9,7 @@ import {
 
 const router = Router();
 
-router.get('/healthCheck', (req: Request, res: Response) => { res.sendStatus(200) });
+router.get('/health-check', (req: Request, res: Response) => { res.sendStatus(200) });
 
 router.get('/', getAlldatas);
 
