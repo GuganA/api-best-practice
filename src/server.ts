@@ -1,27 +1,41 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import { Data, User } from './v1/routes';
 import { checkConnection, logger, config, swaggerDocs } from './utils';
 import cookieParser from 'cookie-parser';
 import apicache from 'apicache';
+import path from 'path';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
-const port = config.port || 3000;
+const port = config.PORT || 3000;
 const cache = apicache.middleware;
 
-app.use(bodyParser.json()); // Parsing json Objects
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+
+app.use(express.static('public'));
+app.use(cors());
+app.use(helmet()); // for secure headers
+app.use(limiter); // rate limiter
+app.use(express.json()); // Parsing json Objects
 app.use(cookieParser()); // Parsing cookie
 app.use(cache(2)); // Server Cache
 
 checkConnection();
 
 app.get('/', (req, res) => {
-  res.send(`<b>Check Health....</b>
-            <a href='/api/v1/data/healthCheck'>HealthCheck</a>
-  `);
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.use('/api/v1/data', Data);
+app.get('/api/v1/healthCheck', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+app.use('/api/v1/stories', Data);
 app.use('/api/v1/users', User);
 
 app.listen(port, () => {

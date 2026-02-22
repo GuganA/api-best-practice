@@ -1,32 +1,33 @@
+import slugify from 'slugify';
 import { dataModal } from '../modal';
 import { logger } from '../utils'
 
 class Data {
   getAlldata = () => {
     return new Promise((resolve, reject) => {
-      dataModal.find()
+      dataModal.find({ isPublic: true })
         .then((data: any) => {
-          resolve(data);
+          return resolve(data);
         })
         .catch((error) => {
           logger.error({ error }, 'Error in fetching data.');
-          reject({ status: 400, error: error });
+          return reject({ status: 400, error: error });
         });
     });
   };
 
-  getData = async (dataId: string) => {
+  getData = (dataId: string) => {
     return new Promise((resolve, reject) => {
       dataModal.findById(dataId)
         .then((data: any) => {
           if (!data) {
-            reject({ status: 404, error: 'No Data found' });
+            return reject({ status: 404, error: 'No Data found' });
           }
-          resolve(data);
+          return resolve(data);
         })
         .catch((error) => {
           logger.error({ error }, `Error in fetching data for ${dataId}.`);
-          reject({ status: 400, error: error });
+          return reject({ status: 400, error: error });
         });
     });
   };
@@ -34,50 +35,49 @@ class Data {
   createData = (newData: any) => {
     return new Promise(async (resolve, reject) => {
       try {
-        const writer = newData.writer;
-        const name = newData.name;
-        const content = newData.content;
-        const isPublic = newData.isPublic;
+        const { writer, title, content, isPublic } = newData;
+        const slug = slugify(title, { lower: true, strict: true });
 
-
-        await dataModal.create({
+        const data = await dataModal.create({
           writer,
-          name,
+          title,
           content,
           isPublic,
+          slug
         });
 
-        resolve(newData);
+        return resolve(data);
       } catch (error) {
         logger.error({ error }, `Error in creating data.`);
-        reject({ status: 400, error: error });
+        return reject({ status: 400, error: error });
       }
     });
   };
 
   deleteData = (dataId: string) => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       dataModal.findByIdAndDelete(dataId)
         .then(() => {
-          resolve(true);
+          return resolve(true);
         })
         .catch((error) => {
           logger.error({ error }, 'Error in deleting data.');
-          reject({ status: 400, error: error });
+          return reject({ status: 400, error: error });
         });
     });
   };
 
   updateData = (dataId: string, updateData: any) => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       dataModal.findOneAndUpdate(
         { _id: dataId },
         {
           $set: {
-            name: updateData.name,
-            content: updateData.description,
-            writer: updateData.writer,
+            title: updateData.title,
+            content: updateData.content,
+            writer: updateData._id,
             isPublic: updateData.isPublic,
+            slug: slugify(updateData.title, { lower: true, strict: true }),
             updatedAt: new Date().toLocaleString('en-US', { timeZone: 'UTC' })
           },
         },
@@ -85,9 +85,9 @@ class Data {
         (error, data) => {
           if (error) {
             logger.error({ error }, `Error in updating data for ${dataId}.`);
-            reject({ status: 400, error: error });
+            return reject({ status: 400, error: error });
           } else {
-            resolve(data);
+            return resolve(data);
           }
         });
     });

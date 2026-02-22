@@ -14,10 +14,7 @@ const userSchema = new Schema({
     password: { 
         type: String, 
         required: true,
-        minlength: 6
     },
-    createdAt: { type: String },
-    updatedAt: { type: String }
 }, {
     timestamps: true
 });

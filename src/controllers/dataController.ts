@@ -18,10 +18,11 @@ export const getOnedata = (req: Request, res: Response) => {
 };
 
 export const createNewdata = (req: Request, res: Response) => {
-  if (!req?.body?.name || !req?.body?.description || !req?.body?.writer) {
+  if (!req?.body?.title || !req?.body?.content) {
     res.status(500).send({ status: 'Error', Error: 'Please enter the missing data' })
   }
-  data.createData(req.body).then((data: any) => {
+  const userId = (req as any).user.id;
+  data.createData({ ...req.body, writer: userId }).then((data: any) => {
     return res.send({ status: 'OK', Data: data, message: 'New data created' });
   }).catch((err) => {
     return res.status(err?.status || 500).send({ status: 'Error', Error: err.error });
@@ -29,10 +30,11 @@ export const createNewdata = (req: Request, res: Response) => {
 };
 
 export const updateOnedata = (req: Request, res: Response) => {
-  if (!req?.body?.name || !req?.body?.description || !req?.body?.writer) {
+  if (!req?.body?.title || !req?.body?.content) {
     res.status(500).send({ status: 'Error', Error: 'Please enter the missing data' })
   }
-  data.updateData(req.params.dataId, req.body).then((data: any) => {
+  const userId = (req as any).user.id;
+  data.updateData(req.params.dataId, { ...req.body, writer: userId }).then((data: any) => {
     return res.send({ status: 'OK', Data: data, message: 'Data updated successfully' })
   }).catch((err) => {
     return res.status(err?.status || 500).send({ status: 'Error', Error: err.error })

@@ -20,41 +20,37 @@ class User {
         });
     };
 
-    getByEmailUser = (email: string) => {
-        return new Promise((resolve, reject) => {
-            UserModal.findOne({ email: email })
-                .then((data: any) => {
-                    if (!data) {
-                        reject({ status: 404, error: 'No Data found' });
-                    }
-                    resolve(data);
-                })
-                .catch((error: any) => {
-                    logger.error({ error }, 'Error in fetching User.');
-                    reject({ status: 400, error: error });
-                });
-        });
-    };
+    getByEmailUser = async (email: string) => {
+        try {
+            const data = await UserModal.findOne({ email: email });
+
+            if (!data) {
+                return { status: 404, error: 'User not found' };  // or 'No user with this email'
+            }
+
+            return data;
+        } catch (error) {
+            logger.error({ error }, 'Error fetching user by email');
+            return { status: 500, error: 'Internal server error' };
+        }
+    }
 
     createUser = (newUser: any) => {
         return new Promise(async (resolve, reject) => {
             try {
 
-                const isExistingUser = await this.getByEmailUser(newUser.email);
+                const isExistingUser: any = await this.getByEmailUser(newUser.email);
 
-                if (isExistingUser) {
+                if (isExistingUser && isExistingUser.status !== 404) {
                     logger.error(`User already exists, Please Login`);
                     reject({ status: 400, error: 'User already exists, Please Login' });
                 }
 
-                const email = newUser.email;
-                const name = newUser.name;
-                const password = newUser.password;
-
+                const { email, name, password } = newUser;
                 const salt = await bcrypt.genSalt(10);
                 const hash = await bcrypt.hash(password, salt);
 
-                await UserModal.create({
+                const newUserFromDb = await UserModal.create({
                     email,
                     name,
                     password: hash,
@@ -62,11 +58,11 @@ class User {
 
                 delete newUser.password;
 
-                newUser.token = this.generateJwt(email)
-                resolve(newUser);
+                newUser.token = this.generateJwt({ id: newUserFromDb._id, email: newUserFromDb.email });
+                return resolve(newUser);
             } catch (error) {
                 logger.error({ error }, `Error in creating User.`);
-                reject({ status: 400, error: error });
+                return reject({ status: 400, error: error });
             }
         });
     };
@@ -74,29 +70,34 @@ class User {
 
     signIn = (params: any) => {
         return new Promise(async (resolve, reject) => {
-            const { email, password } = params;
-            const getUser: any = await this.getByEmailUser(email);
+            try {
+                const { email, password } = params;
+                const getUser: any = await this.getByEmailUser(email);
 
-            if (!getUser) {
-                logger.error(`Error in signing in. User not Exist, Please create a account.`);
-                reject({ status: 404, error: 'User not Exist, Please create a account.' });
+                if (!getUser) {
+                    logger.error(`Error in signing in. User not Exist, Please create a account.`);
+                    reject({ status: 404, error: 'User not Exist, Please create a account.' });
+                }
+
+                const isSame = await bcrypt.compare(password, getUser.password);
+
+                if (!isSame) {
+                    logger.error(`Error in signing in. Invalid Password.`);
+                    reject({ status: 400, error: 'Invalid Password.' });
+                }
+
+                const token = this.generateJwt({ id: getUser._id, email: getUser.email });
+
+                return resolve(token);
+            } catch (error) {
+                return reject(error);
             }
-
-            const isSame = await bcrypt.compare(password, getUser.password);
-
-            if (!isSame) {
-                logger.error(`Error in signing in. Invalid Password.`);
-                reject({ status: 400, error: 'Invalid Password.' });
-            }
-            const token = this.generateJwt(email);
-
-            return resolve(token);
         });
     };
 
     generateJwt = (payload: any) => {
-        jwt.sign(
-            { email: payload.email },
+        return jwt.sign(
+            { id: payload.id, email: payload.email },
             config.JWT_SECRET,
             { expiresIn: '5 days' }
         )
