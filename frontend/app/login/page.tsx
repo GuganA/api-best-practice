@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { setToken } from '@/lib/auth';
 import { apiFetch } from '@/lib/api';
+import Link from 'next/link';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -108,6 +109,24 @@ const LoginPage = () => {
           >
             Sign In
           </Button>
+          <Box textAlign='center' mt={2}>
+            <Typography variant='body2'>
+              Don&apos;t have an account?{' '}
+              <Link href='/signup' style={{ textDecoration: 'none' }}>
+                <Typography
+                  component='span'
+                  color='primary'
+                  sx={{
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    '&:hover': { textDecoration: 'underline' },
+                  }}
+                >
+                  Create one
+                </Typography>
+              </Link>
+            </Typography>
+          </Box>
         </Paper>
       </Box>
     </Container>

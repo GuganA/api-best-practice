@@ -47,8 +47,8 @@ export default function SignupPage() {
       }
 
       // If backend returns token immediately
-      if (res.token) {
-        setToken(res.token);
+      if (res.Data.token) {
+        setToken(res.Data.token);
         router.push('/stories');
       } else {
         // If no token returned → redirect to login
