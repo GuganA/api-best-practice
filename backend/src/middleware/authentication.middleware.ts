@@ -6,12 +6,12 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        return res.redirect('/login');
+        return res.status(401).json({ message: 'No token' });
     };
 
     const token = authHeader?.split(' ')[1];
     if (!token) {
-        return res.redirect('/login');
+        return res.status(401).json({ message: 'No token' });
     } else {
         const decoded = jwt.verify(token, config.JWT_SECRET);
         // const user = await UserModal.findById(decoded.id);

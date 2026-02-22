@@ -18,7 +18,12 @@ const limiter = rateLimit({
 });
 
 app.use(express.static('public'));
-app.use(cors());
+app.use(cors({
+  origin: config.FRONT_END_URL,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // explicitly allow common methods including OPTIONS
+  allowedHeaders: ['Content-Type', 'Authorization'],   // allow necessary headers
+}));
 app.use(helmet()); // for secure headers
 app.use(limiter); // rate limiter
 app.use(express.json()); // Parsing json Objects

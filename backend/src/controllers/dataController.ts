@@ -2,7 +2,9 @@ import { data } from '../services';
 import { Request, Response } from 'express';
 
 export const getAlldatas = (req: Request, res: Response) => {
-  data.getAlldata().then((allData: any) => {
+  const isPrivate = req.query.private;
+  const userId = (req as any).user.id;
+  data.getAlldata({ isPrivate, userId }).then((allData: any) => {
     return res.status(200).send({ status: 'OK', Data: allData });
   }).catch((err) => {
     return res.status(err?.status || 500).send({ status: 'Error', Error: err.error });

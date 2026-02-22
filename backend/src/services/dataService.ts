@@ -3,9 +3,17 @@ import { dataModal } from '../modal';
 import { logger } from '../utils'
 
 class Data {
-  getAlldata = () => {
+  getAlldata = (filter: any) => {
     return new Promise((resolve, reject) => {
-      dataModal.find({ isPublic: true })
+      let payload: any = {
+        isPublic: true,
+
+      };
+      if (filter.isPrivate) {
+        payload.isPublic = false;
+        payload.writer = filter.userId
+      }
+      dataModal.find(payload)
         .then((data: any) => {
           return resolve(data);
         })
