@@ -8,7 +8,7 @@ export const apiFetch = async (
 ) => {
   const token = getToken();
 
-  const headers: HeadersInit = {
+  const headers: Record<string, any> = {
     'Content-Type': 'application/json',
     ...options.headers,
   };

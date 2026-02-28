@@ -30,22 +30,26 @@ export default function StoryPage() {
     const router = useRouter();
 
     useEffect(() => {
-        fetchStories();
-    }, [selectedTab]);
+        const loadStories = async () => {
+            try {
+                const endpoint =
+                    selectedTab === 'private'
+                        ? '/stories?private=true'
+                        : '/stories';
 
-    const fetchStories = async () => {
-        try {
-            let endpoint = '/stories';
-            if (selectedTab === 'private') {
-                endpoint = `/stories?private=true`; // fetch only private stories for this user
+                const data = await apiFetch(endpoint);
+                setStories(data?.Data || []);
+            } catch (error: any) {
+                if (error?.status === 401) {
+                    removeToken();
+                    router.push('/login');
+                }
             }
-            const data = await apiFetch(endpoint);
-            setStories(data?.Data || []);
-        } catch (error) {
-            removeToken();
-            router.push('/login');
-        }
-    };
+        };
+
+        loadStories();
+    }, [selectedTab, router]);
+
 
     const handleLogout = () => {
         removeToken();
