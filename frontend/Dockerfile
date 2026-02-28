@@ -1,7 +1,28 @@
-FROM node:20-alpine
+# ---------- Stage 1: Build ----------
+FROM node:20-slim AS builder
+
 WORKDIR /app
+
 COPY package*.json ./
-RUN npm install
+RUN npm ci
+
 COPY . .
+RUN npm run build
+
+# ---------- Stage 2: Production ----------
+FROM node:20-slim
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy standalone server
+COPY --from=builder /app/.next/standalone ./
+
+# Copy static files
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
 EXPOSE 3000
-CMD ["npm", "start"]
+
+CMD ["node", "server.js"]
