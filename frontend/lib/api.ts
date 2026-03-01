@@ -1,6 +1,9 @@
 import { getToken } from './auth';
 
-const BASE_URL = 'http://localhost:5000/api/v1';
+// const BASE_URL = 'http://localhost:5000/api/v1';
+const URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+console.log('URL',process.env.NEXT_PUBLIC_API_URL);
+const BASE_URL = `${URL}/api/v1`;
 
 export const apiFetch = async (
   endpoint: string,

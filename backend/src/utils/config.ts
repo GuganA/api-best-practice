@@ -10,9 +10,11 @@ if (!process.env.MONGO_URI) {
   throw new Error('MONGO_URI is not defined in environment variables');
 }
 
+const allowedOrigins: Array<string> | any = process?.env?.FRONT_END_URL?.split(',');
+
 export const config = {
   PORT: Number(process.env.PORT) || 5000,
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
-  FRONT_END_URL: process.env.FRONT_END_URL
+  FRONT_END_URL: allowedOrigins
 };
