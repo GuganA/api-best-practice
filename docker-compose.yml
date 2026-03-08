@@ -1,0 +1,58 @@
+version: '3.9' # version of docker compose
+services: # containers you want to run
+  mongodb: # service name
+    image: mongo:7 # image
+    container_name: mongodb
+    ports: # exposing port
+      - '27017:27017' # host:port
+    networks: # custom network to communicate
+      - app-network
+    volumes: # presist data
+      - mongo-data:/data/db
+
+  backend:
+    # build: ./backend # building the image
+    image: stories-backend:latest
+    container_name: backend
+    env_file: # passing env file
+      - ./backend/.env.prod
+    ports:
+      - '5000:5000'
+    networks:
+      - app-network
+    depends_on: # depends on which service to run after that
+      - mongodb
+
+  frontend:
+    # build: ./frontend
+    image: stories-frontend:latest
+    container_name: frontend
+    env_file:
+      - ./frontend/.env
+    ports:
+      - '80:3000'
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+# global data declaration which can be used to every service and to create if not exist
+volumes:
+  mongo-data:
+
+# same as volumes global declaration and to create if not exist
+networks:
+  app-network:
+    driver: bridge
+
+# run this always to rebuild with code changes 
+# docker compose up --build
+
+# normal up
+# docker compose up
+
+# detached mode
+# docker compose up -d
+
+# down
+# docker compose down
